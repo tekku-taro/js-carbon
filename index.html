@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JsCarbon Test</title>
+</head>
+
+<body>
+  <h1>JsCarbon Test Page</h1>
+  <script type="module">
+    import { JsCarbon } from './dist/index.js';
+
+    // JsCarbon.now() を使用して現在の日付でインスタンスを作成
+    const jsCarbon = JsCarbon.now();
+    console.log(jsCarbon.toString());  // 現在の日付を表示
+
+    // 5日後の日付を表示
+    console.log(jsCarbon.addDays(5).toString());
+  </script>
+</body>
+
+</html>
