@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JsCarbon Demo2</title>
+</head>
+
+<body>
+
+  <script type="module">
+    import { JsCarbon } from './dist/index.js';
+
+    // 現在日時のインスタンス生成
+    const now = JsCarbon.now();
+
+    // 日付のフォーマット
+    console.log(now.format("YYYY-MM-DD HH:mm:ss"));
+
+    // 日付の加算/減算
+    now.addDays(5);
+    console.log('日付の加算 +5', now.toDateString()); // 5日後
+    now.subDays(5);
+    // 日付のクローン
+    const cloned = now.clone()
+    console.log('日付のクローン 5カ月後', cloned.addMonths(5).toDateString()); // 5カ月後
+    console.log('日付のクローン 現在', now.toDateString()); // 現在
+
+
+    // 時差を含む日付の操作
+    const other = JsCarbon.create(2023, 5, 15);
+    console.log('時差を含む日付の操作', now.diffInDays(other)); // 他の日付との日数差
+
+    // 日付の比較
+    if (now.isBefore(other)) {
+      console.log("今は2023-5-15より前です。");
+    }
+    if (now.isAfter(other)) {
+      console.log("今は2023-5-15より後です。");
+    }
+
+    // タイムゾーンの設定
+    const nyTime = JsCarbon.now("America/New_York");
+    console.log('タイムゾーンの設定', nyTime.toLocaleString()); // ニューヨーク時間で表示
+
+    // ロケールの設定
+    now.setLocale("ja");
+    console.log('ロケールの設定', now.toLocaleDateString());
+
+    // デフォルトロケールを設定
+    JsCarbon.setDefaultLocale("ja");
+
+    // 日本語ロケールで東京時間の現在時刻を作成
+    const tokyo = JsCarbon.now("Asia/Tokyo", "ja");
+
+    // フランス語ロケールでパリ時間に変換
+    const paris = tokyo.clone().setLocale("fr").setTimezone("Europe/Paris");
+
+    // ローカライズされた日付表示
+    console.log('日本語形式ローカライズされた日付表示', tokyo.toLocaleString()); // 日本語形式
+    console.log('フランス語形式ローカライズされた日付表示', paris.toLocaleString()); // フランス語形式
+
+    // 相対時間表示も各ロケールで
+    console.log('日本語ロケール相対時間表示', tokyo.diffForHumans()); // 「3時間前」など
+    console.log('フランス語ロケール相対時間表示', paris.diffForHumans()); // "il y a 3 heures" など
+  </script>
+</body>
+
+</html>

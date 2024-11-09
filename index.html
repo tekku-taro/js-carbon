@@ -4,20 +4,194 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JsCarbon Test</title>
+  <title>JsCarbon Demo</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+  <style>
+    /* 既存のスタイルをそのまま使用 */
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+
+    .container {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .section {
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    .result {
+      margin-top: 10px;
+      padding: 10px;
+      background-color: #f8f9fa;
+      border-radius: 4px;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    input,
+    select {
+      padding: 6px;
+      margin: 5px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    .label {
+      font-weight: bold;
+      margin-right: 10px;
+    }
+  </style>
 </head>
 
 <body>
-  <h1>JsCarbon Test Page</h1>
+  <div class="container">
+    <h1>JsCarbon Demo</h1>
+
+    <div class="section">
+      <h2>Current Date and Time</h2>
+      <div class="result" id="currentDateTime"></div>
+      <button id="updateButton">Update</button>
+    </div>
+
+    <div class="section">
+      <h2>Date Formatting</h2>
+      <input type="text" id="formatString" value="YYYY-MM-DD HH:mm:ss">
+      <button id="formatButton">Format</button>
+      <div class="result" id="formattedDate"></div>
+    </div>
+
+    <div class="section">
+      <h2>Date Manipulation</h2>
+      <button id="addDayButton">Add 1 Day</button>
+      <button id="subDayButton">Subtract 1 Day</button>
+      <button id="addMonthButton">Add 1 Month</button>
+      <button id="subMonthButton">Subtract 1 Month</button>
+      <div class="result" id="manipulatedDate"></div>
+    </div>
+
+    <div class="section">
+      <h2>Relative Time</h2>
+      <select id="localeSelect">
+        <option value="en">English</option>
+        <option value="ja">Japanese</option>
+      </select>
+      <button id="relativeTimeButton">Show Relative Time</button>
+      <div class="result" id="relativeTime"></div>
+    </div>
+
+    <div class="section">
+      <h2>Timezone Operations</h2>
+      <select id="timezoneSelect">
+        <option value="UTC">UTC</option>
+        <option value="Asia/Tokyo">Asia/Tokyo</option>
+        <option value="America/New_York">America/New_York</option>
+        <option value="Europe/London">Europe/London</option>
+      </select>
+      <button id="timezoneButton">Change Timezone</button>
+      <div class="result" id="timezoneResult"></div>
+    </div>
+  </div>
+
   <script type="module">
     import { JsCarbon } from './dist/index.js';
 
-    // JsCarbon.now() を使用して現在の日付でインスタンスを作成
-    const jsCarbon = JsCarbon.now();
-    console.log(jsCarbon.toString());  // 現在の日付を表示
+    let currentDate = null;
 
-    // 5日後の日付を表示
-    console.log(jsCarbon.addDays(5).toString());
+    function initializeDate() {
+      currentDate = JsCarbon.now();
+      updateCurrentDateTime();
+    }
+
+    function updateCurrentDateTime() {
+      currentDate = JsCarbon.now();
+      const element = document.getElementById('currentDateTime');
+      element.innerHTML = `
+                <div><span class="label">Local:</span> ${currentDate.toLocaleString()}</div>
+                <div><span class="label">ISO:</span> ${currentDate.toISOString()}</div>
+                <div><span class="label">Timezone:</span> ${currentDate.timezone()}</div>
+            `;
+    }
+
+    function formatDate() {
+      if (!currentDate) initializeDate();
+      const formatStr = document.getElementById('formatString').value;
+      const element = document.getElementById('formattedDate');
+      element.textContent = currentDate.format(formatStr);
+    }
+
+    function addDays(days) {
+      if (!currentDate) initializeDate();
+      currentDate.addDays(days);
+      document.getElementById('manipulatedDate').textContent =
+        currentDate.format('YYYY-MM-DD HH:mm:ss');
+    }
+
+    function addMonths(months) {
+      if (!currentDate) initializeDate();
+      currentDate.addMonths(months);
+      document.getElementById('manipulatedDate').textContent =
+        currentDate.format('YYYY-MM-DD HH:mm:ss');
+    }
+
+    function showRelativeTime() {
+      if (!currentDate) initializeDate();
+      const locale = document.getElementById('localeSelect').value;
+      currentDate.setLocale(locale);
+      const element = document.getElementById('relativeTime');
+      element.innerHTML = `
+                <div><span class="label">From Now:</span> ${currentDate.diffForHumans()}</div>
+                <div><span class="label">Day Name:</span> ${currentDate.dayName()}</div>
+                <div><span class="label">Month Name:</span> ${currentDate.monthName()}</div>
+            `;
+    }
+
+    function changeTimezone() {
+      if (!currentDate) initializeDate();
+      const timezone = document.getElementById('timezoneSelect').value;
+      currentDate.setTimezone(timezone);
+      const element = document.getElementById('timezoneResult');
+      element.innerHTML = `
+                <div><span class="label">Time in ${timezone}:</span> ${currentDate.toTimezoneString()}</div>
+                <div><span class="label">Offset:</span> ${currentDate.timezoneOffset()}</div>
+                <div><span class="label">Is DST:</span> ${currentDate.isDST()}</div>
+            `;
+    }
+
+    // イベントリスナーの設定
+    document.getElementById('updateButton').addEventListener('click', updateCurrentDateTime);
+    document.getElementById('formatButton').addEventListener('click', formatDate);
+    document.getElementById('addDayButton').addEventListener('click', () => addDays(1));
+    document.getElementById('subDayButton').addEventListener('click', () => addDays(-1));
+    document.getElementById('addMonthButton').addEventListener('click', () => addMonths(1));
+    document.getElementById('subMonthButton').addEventListener('click', () => addMonths(-1));
+    document.getElementById('relativeTimeButton').addEventListener('click', showRelativeTime);
+    document.getElementById('timezoneButton').addEventListener('click', changeTimezone);
+
+    // 初期化
+    initializeDate();
   </script>
 </body>
 
