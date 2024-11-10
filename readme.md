@@ -95,6 +95,13 @@ console.log("フランス語ロケール相対時間表示", paris.diffForHumans
   - 引数
     - locale (LocaleType): 設定するロケールコード（例: "en", "ja" など）
 
+- `setDefaultTimezone(timezone: string): void`
+
+  - デフォルトタイムゾーンを設定します。指定したタイムゾーンがサポートされていない場合、エラーをスローします。
+
+  - 引数
+    - timezone (string): 設定するタイムゾーンコード（例: "America/New_York", "Asia/Tokyo" など）
+
 - `now(timezone?: string, locale?: LocaleType): JsCarbon`
 
   - 現在の日付と時刻を含む JsCarbon インスタンスを作成します。
