@@ -113,6 +113,19 @@ describe("JsCarbon", () => {
 
   // タイムゾーン関連のテスト
   describe("timezone operations", () => {
+    test("setDefaultTimezone sets default timezone", () => {
+      JsCarbon.setDefaultTimezone("Asia/Tokyo");
+      const instance = new JsCarbon();
+      expect(instance.timezone()).toBe("Asia/Tokyo");
+    });
+    test("throws error for invalid timezone", () => {
+      expect(() => {
+        jsCarbon.setTimezone("invalid-timezone" as any);
+      }).toThrow("Unsupported timezone");
+      expect(() => {
+        JsCarbon.setDefaultTimezone("invalid-timezone" as any);
+      }).toThrow("Unsupported timezone");
+    });
     test("setTimezone changes timezone", () => {
       const instance = jsCarbon.setTimezone("Asia/Tokyo");
       expect(instance.timezone()).toBe("Asia/Tokyo");

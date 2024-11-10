@@ -5,16 +5,19 @@ import { TRANSLATIONS } from "./i18n/translations";
 export class JsCarbon {
   private date: Date;
   private static readonly DAYS_IN_WEEK = 7;
-  private _locale: LocaleType = "en";
+  private _locale: LocaleType;
   private _timezone: string;
 
   // デフォルトロケールの設定
   private static defaultLocale: LocaleType = "en";
+  private static defaultTimezone: string;
 
   constructor(date: Date = new Date(), timezone?: string, locale?: LocaleType) {
     this.date = date;
     this._timezone =
-      timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+      timezone ||
+      JsCarbon.defaultTimezone ||
+      Intl.DateTimeFormat().resolvedOptions().timeZone;
     this._locale = locale || JsCarbon.defaultLocale;
   }
 
@@ -24,6 +27,16 @@ export class JsCarbon {
       JsCarbon.defaultLocale = locale;
     } else {
       throw new Error(`Unsupported locale: ${locale}`);
+    }
+  }
+
+  // デフォルトタイムゾーンを設定するstaticメソッド
+  static setDefaultTimezone(timezone: string): void {
+    try {
+      Intl.DateTimeFormat(undefined, { timeZone: timezone });
+      JsCarbon.defaultTimezone = timezone;
+    } catch (e) {
+      throw new Error(`Unsupported timezone: ${timezone}`);
     }
   }
 
@@ -279,13 +292,18 @@ export class JsCarbon {
 
   // 2.9 Timezone Operations
   setTimezone(timezone: string): JsCarbon {
+    try {
+      Intl.DateTimeFormat(undefined, { timeZone: timezone });
+      this._timezone = timezone;
+      return this;
+    } catch (e) {
+      throw new Error(`Unsupported timezone: ${timezone}`);
+    }
     // const targetDate = new Date(
     //   this.date.toLocaleString("en-US", { timeZone: timezone })
     // );
     // const offset = targetDate.getTime() - this.date.getTime();
     // this.date = new Date(this.date.getTime() + offset);
-    this._timezone = timezone;
-    return this;
   }
 
   timezone(): string {
