@@ -1,9 +1,10 @@
 export class JsCarbon {
   constructor(date = new Date(), timezone, locale) {
-    this._locale = "en";
     this.date = date;
     this._timezone =
-      timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+      timezone ||
+      JsCarbon.defaultTimezone ||
+      Intl.DateTimeFormat().resolvedOptions().timeZone;
     this._locale = locale || JsCarbon.defaultLocale;
   }
   // デフォルトロケールを設定するstaticメソッド
@@ -12,6 +13,15 @@ export class JsCarbon {
       JsCarbon.defaultLocale = locale;
     } else {
       throw new Error(`Unsupported locale: ${locale}`);
+    }
+  }
+  // デフォルトタイムゾーンを設定するstaticメソッド
+  static setDefaultTimezone(timezone) {
+    try {
+      Intl.DateTimeFormat(undefined, { timeZone: timezone });
+      JsCarbon.defaultTimezone = timezone;
+    } catch (e) {
+      throw new Error(`Unsupported timezone: ${timezone}`);
     }
   }
   // static メソッドもロケールを受け取れるように拡張
@@ -211,13 +221,18 @@ export class JsCarbon {
   }
   // 2.9 Timezone Operations
   setTimezone(timezone) {
+    try {
+      Intl.DateTimeFormat(undefined, { timeZone: timezone });
+      this._timezone = timezone;
+      return this;
+    } catch (e) {
+      throw new Error(`Unsupported timezone: ${timezone}`);
+    }
     // const targetDate = new Date(
     //   this.date.toLocaleString("en-US", { timeZone: timezone })
     // );
     // const offset = targetDate.getTime() - this.date.getTime();
     // this.date = new Date(this.date.getTime() + offset);
-    this._timezone = timezone;
-    return this;
   }
   timezone() {
     return this._timezone;
