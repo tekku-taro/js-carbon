@@ -1,6 +1,7 @@
 // src/__tests__/JsCarbon.test.ts
 
-import { JsCarbon } from "../index";
+import { JsCarbon } from "../js-carbon";
+import { JsCarbonInterval } from "../js-carbon-interval";
 
 describe("JsCarbon", () => {
   let jsCarbon: JsCarbon;
@@ -265,5 +266,72 @@ describe("JsCarbon", () => {
     const result = jsCarbon.toJsDate();
     expect(result).toBeInstanceOf(Date);
     expect(result.toDateString()).toBe(initialDate.toDateString());
+  });
+
+  describe("add() method", () => {
+    test("adds interval correctly", () => {
+      const interval = new JsCarbonInterval(1, 2, 3, 4, 5, 6);
+      // 2024-01-01 12:00:00 で固定
+      const result = jsCarbon.add(interval);
+
+      expect(result.year()).toBe(2025);
+      expect(result.month()).toBe(3); // March (1 + 2 months)
+      expect(result.day()).toBe(4); // 1 + 3 days
+      expect(result.toJsDate().getHours()).toBe(16); // 12 + 4 hours
+      expect(result.toJsDate().getMinutes()).toBe(5); // 0 + 5 minutes
+      expect(result.toJsDate().getSeconds()).toBe(6); // 0 + 6 seconds
+    });
+  });
+
+  describe("sub() method", () => {
+    test("subtracts interval correctly", () => {
+      const interval = new JsCarbonInterval(1, 2, 3, 4, 5, 6);
+      // jsCarbon 2024-01-01 12:00:00 で固定
+      const result = jsCarbon.sub(interval);
+
+      expect(result.year()).toBe(2022);
+      expect(result.month()).toBe(10); // November (1 - 2 months)
+      expect(result.day()).toBe(29); // Accounting for month end
+      expect(result.toJsDate().getHours()).toBe(7); // 12 - 4 hours
+      expect(result.toJsDate().getMinutes()).toBe(54); // 0 - 5 minutes
+      expect(result.toJsDate().getSeconds()).toBe(54); // 0 - 6 seconds
+    });
+  });
+
+  describe("diff() method", () => {
+    test("calculates difference correctly", () => {
+      const date1 = new JsCarbon(new Date(2024, 0, 1));
+      const date2 = new JsCarbon(new Date(2025, 2, 4, 4, 5, 6));
+
+      const interval = date1.diff(date2);
+      expect(interval.years).toBe(1);
+      expect(interval.months).toBe(2);
+      expect(interval.days).toBe(3);
+      expect(interval.hours).toBe(4);
+      expect(interval.minutes).toBe(5);
+      expect(interval.seconds).toBe(6);
+    });
+
+    test("should handle midnight correctly", () => {
+      const midnight = new Date("2024-01-01T00:00:00Z");
+      const jsCarbon = new JsCarbon(midnight, "UTC");
+      const timezoneDate = jsCarbon["getTimezoneDate"]();
+
+      expect(timezoneDate.getUTCHours()).toBe(0);
+      expect(timezoneDate.getUTCDate()).toBe(1); // 日付が変わっていないことを確認
+    });
+
+    test("calculates absolute difference correctly", () => {
+      const date1 = new JsCarbon(new Date(2025, 2, 4, 4, 5, 6));
+      const date2 = new JsCarbon(new Date(2024, 0, 1));
+
+      const interval = date1.diff(date2, true);
+      expect(interval.years).toBe(1);
+      expect(interval.months).toBe(2);
+      expect(interval.days).toBe(3);
+      expect(interval.hours).toBe(4);
+      expect(interval.minutes).toBe(5);
+      expect(interval.seconds).toBe(6);
+    });
   });
 });
