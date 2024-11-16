@@ -1,6 +1,7 @@
-// src/index.ts
+// src/js-carbon.ts
 
 import { TRANSLATIONS } from "./i18n/translations";
+import { JsCarbonInterval } from "./js-carbon-interval";
 
 export class JsCarbon {
   private date: Date;
@@ -124,6 +125,26 @@ export class JsCarbon {
   }
 
   // 2.3 Date Addition and Subtraction
+  addHours(hours: number): JsCarbon {
+    this.date.setHours(this.date.getHours() + hours);
+    return this;
+  }
+
+  addMinutes(minutes: number): JsCarbon {
+    this.date.setMinutes(this.date.getMinutes() + minutes);
+    return this;
+  }
+
+  addSeconds(seconds: number): JsCarbon {
+    this.date.setSeconds(this.date.getSeconds() + seconds);
+    return this;
+  }
+
+  addMilliseconds(milliseconds: number): JsCarbon {
+    this.date.setMilliseconds(this.date.getMilliseconds() + milliseconds);
+    return this;
+  }
+
   addDays(days: number): JsCarbon {
     this.date.setDate(this.date.getDate() + days);
     return this;
@@ -151,10 +172,101 @@ export class JsCarbon {
     return this.addYears(-years);
   }
 
+  /**
+   * 期間を加算して新しい JsCarbon インスタンスを返す
+   * @param interval 加算する期間
+   * @returns 新しい JsCarbon インスタンス
+   */
+  add(interval: JsCarbonInterval): JsCarbon {
+    const result = this.clone();
+    result.addYears(interval.years);
+    result.addMonths(interval.months);
+    result.addDays(interval.days);
+    result.addHours(interval.hours);
+    result.addMinutes(interval.minutes);
+    result.addSeconds(interval.seconds);
+    return result;
+  }
+
+  /**
+   * 期間を減算して新しい JsCarbon インスタンスを返す
+   * @param interval 減算する期間
+   * @returns 新しい JsCarbon インスタンス
+   */
+  sub(interval: JsCarbonInterval): JsCarbon {
+    const result = this.clone();
+    result.addYears(-interval.years);
+    result.addMonths(-interval.months);
+    result.addDays(-interval.days);
+    result.addHours(-interval.hours);
+    result.addMinutes(-interval.minutes);
+    result.addSeconds(-interval.seconds);
+    return result;
+  }
+
   // 2.4 Date Difference Calculations
+  // タイムゾーンを考慮した時刻を取得するprivateメソッド
+  private getTimezoneDate(): Date {
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: this._timezone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    });
+
+    const parts = formatter.formatToParts(this.date);
+    const dateValues = parts.reduce(
+      (acc, part) => {
+        if (part.type === "hour" && part.value === "24") {
+          // 24時の場合は0時として扱う
+          acc[part.type] = 0;
+        } else {
+          acc[part.type] = parseInt(part.value);
+        }
+        return acc;
+      },
+      {} as Record<string, number>
+    );
+
+    // タイムゾーンを考慮した新しいDateオブジェクトを作成
+    const tzDate = new Date(
+      Date.UTC(
+        dateValues.year,
+        dateValues.month - 1,
+        dateValues.day,
+        dateValues.hour,
+        dateValues.minute,
+        dateValues.second
+      )
+    );
+
+    return tzDate;
+  }
+
+  /**
+   * 2つの日付の差分を計算し、JsCarbonInterval を返す
+   * @param other 比較対象の JsCarbon インスタンス
+   * @param absolute 絶対値を返すかどうか
+   * @returns JsCarbonInterval インスタンス
+   */
+  diff(other: JsCarbon, absolute: boolean = false): JsCarbonInterval {
+    // タイムゾーンを考慮した日付を取得
+    const thisDate = this.getTimezoneDate();
+    const otherDate = other.getTimezoneDate();
+
+    const thisCarbon = new JsCarbon(thisDate, "UTC");
+    const otherCarbon = new JsCarbon(otherDate, "UTC");
+
+    return JsCarbonInterval.fromDiff(thisCarbon, otherCarbon, absolute);
+  }
+
   diffInDays(other: JsCarbon): number {
-    const diffTime = Math.abs(this.date.getTime() - other.date.getTime());
-    return Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    const diffTime = this.date.getTime() - other.date.getTime();
+    return Math.trunc(diffTime / (1000 * 60 * 60 * 24));
   }
 
   diffInMonths(other: JsCarbon): number {
@@ -164,7 +276,7 @@ export class JsCarbon {
   }
 
   diffInYears(other: JsCarbon): number {
-    return Math.floor(this.diffInMonths(other) / 12);
+    return Math.trunc(this.diffInMonths(other) / 12);
   }
 
   isBefore(other: JsCarbon): boolean {
@@ -512,7 +624,7 @@ export class JsCarbon {
     return this.diffForHumans();
   }
 
-  // 日付を表示するためのメソッド
+  // javascript のDateオブジェクトを返す
   toJsDate(): Date {
     return this.date;
   }
