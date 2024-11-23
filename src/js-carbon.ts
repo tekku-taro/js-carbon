@@ -13,8 +13,12 @@ export class JsCarbon {
   private static defaultLocale: LocaleType = "en";
   private static defaultTimezone: string;
 
-  constructor(date: Date = new Date(), timezone?: string, locale?: LocaleType) {
-    this.date = date;
+  constructor(
+    date: string | number | Date = new Date(),
+    timezone?: string,
+    locale?: LocaleType
+  ) {
+    this.date = date instanceof Date ? date : new Date(date);
     this._timezone =
       timezone ||
       JsCarbon.defaultTimezone ||
@@ -508,6 +512,41 @@ export class JsCarbon {
   // 2.10 Helper Methods
   clone(): JsCarbon {
     return new JsCarbon(new Date(this.date), this._timezone, this._locale);
+  }
+
+  isSunday(): boolean {
+    const day = this.date.getDay();
+    return day === 0;
+  }
+
+  isMonday(): boolean {
+    const day = this.date.getDay();
+    return day === 1;
+  }
+
+  isTuesday(): boolean {
+    const day = this.date.getDay();
+    return day === 2;
+  }
+
+  isWednesday(): boolean {
+    const day = this.date.getDay();
+    return day === 3;
+  }
+
+  isThursday(): boolean {
+    const day = this.date.getDay();
+    return day === 4;
+  }
+
+  isFriday(): boolean {
+    const day = this.date.getDay();
+    return day === 5;
+  }
+
+  isSaturday(): boolean {
+    const day = this.date.getDay();
+    return day === 6;
   }
 
   isWeekend(): boolean {

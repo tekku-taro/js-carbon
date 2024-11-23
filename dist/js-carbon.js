@@ -3,7 +3,7 @@ import { TRANSLATIONS } from "./i18n/translations.js";
 import { JsCarbonInterval } from "./js-carbon-interval.js";
 export class JsCarbon {
   constructor(date = new Date(), timezone, locale) {
-    this.date = date;
+    this.date = date instanceof Date ? date : new Date(date);
     this._timezone =
       timezone ||
       JsCarbon.defaultTimezone ||
@@ -403,6 +403,34 @@ export class JsCarbon {
   // 2.10 Helper Methods
   clone() {
     return new JsCarbon(new Date(this.date), this._timezone, this._locale);
+  }
+  isSunday() {
+    const day = this.date.getDay();
+    return day === 0;
+  }
+  isMonday() {
+    const day = this.date.getDay();
+    return day === 1;
+  }
+  isTuesday() {
+    const day = this.date.getDay();
+    return day === 2;
+  }
+  isWednesday() {
+    const day = this.date.getDay();
+    return day === 3;
+  }
+  isThursday() {
+    const day = this.date.getDay();
+    return day === 4;
+  }
+  isFriday() {
+    const day = this.date.getDay();
+    return day === 5;
+  }
+  isSaturday() {
+    const day = this.date.getDay();
+    return day === 6;
   }
   isWeekend() {
     const day = this.date.getDay();
