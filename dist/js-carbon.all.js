@@ -965,43 +965,44 @@ export class JsCarbonInterval {
     const seconds = Math.floor(absDiffMs / 1000);
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
-    const totalDays = Math.floor(hours / 24);
-    let yearDiff =
-      end.toJsDate().getUTCFullYear() - start.toJsDate().getUTCFullYear();
-    let monthDiff =
-      end.toJsDate().getUTCMonth() - start.toJsDate().getUTCMonth();
-    monthDiff = yearDiff * 12 + monthDiff;
-    yearDiff = Math.trunc(monthDiff / 12);
-    monthDiff %= 12;
-    // // 残りの日を計算
-    // // まず年と月を加算した日付を作成
-    const tempDate = start.clone();
-    tempDate.addYears(yearDiff);
-    tempDate.addMonths(monthDiff);
-    // // その日付から終了日までの日数を計算
-    let dayDiff = end.diffInDays(tempDate);
+    const startYear = startDate.getUTCFullYear();
+    const startMonth = startDate.getUTCMonth();
+    const startDay = startDate.getUTCDate();
     const endYear = endDate.getUTCFullYear();
     const endMonth = endDate.getUTCMonth();
+    const endDay = endDate.getUTCDate();
+    let yearDiff;
+    let monthDiff;
+    let dayDiff;
     if (!interval._invert) {
-      if (dayDiff < 0) {
-        const lastDayOfMonth = new Date(endYear, endMonth, 0).getDate();
-        dayDiff = lastDayOfMonth + dayDiff;
-        monthDiff--;
-        if (monthDiff < 0 && yearDiff > 0) {
-          yearDiff--;
-          monthDiff += 12;
-        }
-      }
+      yearDiff = endYear - startYear;
+      monthDiff = endMonth - startMonth;
+      dayDiff = endDay - startDay;
     } else {
-      if (dayDiff > 0) {
-        const lastDayOfMonth = new Date(endYear, endMonth + 2, 0).getDate();
-        dayDiff = lastDayOfMonth - dayDiff;
-        monthDiff++;
-        if (yearDiff < 0 && monthDiff > 0) {
-          yearDiff++;
-          monthDiff -= 12;
-        }
+      yearDiff = startYear - endYear;
+      monthDiff = startMonth - endMonth;
+      dayDiff = startDay - endDay;
+    }
+    // 日数がマイナスの場合の調整
+    if (dayDiff < 0) {
+      monthDiff--;
+      let lastDayOfMonth;
+      // 開始月の最終日を取得（UTCを使用）
+      if (!interval._invert) {
+        lastDayOfMonth = new Date(
+          Date.UTC(startYear, startMonth + 1, 0)
+        ).getUTCDate();
+      } else {
+        lastDayOfMonth = new Date(
+          Date.UTC(endYear, endMonth + 1, 0)
+        ).getUTCDate();
       }
+      dayDiff += lastDayOfMonth;
+    }
+    // 月数がマイナスの場合の調整
+    if (monthDiff < 0) {
+      yearDiff--;
+      monthDiff += 12;
     }
     interval._years = Math.abs(yearDiff);
     interval._months = Math.abs(monthDiff);
