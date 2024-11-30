@@ -1,3 +1,4 @@
+import { JsCarbon } from "../js-carbon";
 import { JsCarbonInterval } from "../js-carbon-interval";
 
 describe("JsCarbonInterval", () => {
@@ -181,6 +182,132 @@ describe("JsCarbonInterval", () => {
       expect(interval.totalHours).toBeGreaterThan(8760); // More than 1 year in hours
       expect(interval.totalMinutes).toBeGreaterThan(525600); // More than 1 year in minutes
       expect(interval.totalSeconds).toBeGreaterThan(31536000); // More than 1 year in seconds
+    });
+  });
+
+  // Basic date difference calculations
+  describe("fromDiff - Basic Date Differences", () => {
+    test("should calculate interval between two dates in the same year", () => {
+      const start = JsCarbon.create(2023, 1, 15);
+      const end = JsCarbon.create(2023, 6, 20);
+
+      const interval = JsCarbonInterval.fromDiff(start, end);
+
+      expect(interval.years).toBe(0);
+      expect(interval.months).toBe(5);
+      expect(interval.days).toBe(5);
+    });
+
+    test("should calculate interval across year boundary", () => {
+      const start = JsCarbon.create(2022, 12, 25);
+      const end = JsCarbon.create(2023, 2, 10);
+
+      const interval = JsCarbonInterval.fromDiff(start, end);
+
+      expect(interval.years).toBe(0);
+      expect(interval.months).toBe(1);
+      expect(interval.days).toBe(16);
+    });
+
+    test("should handle full year difference", () => {
+      const start = JsCarbon.create(2022, 1, 1);
+      const end = JsCarbon.create(2023, 1, 1);
+
+      const interval = JsCarbonInterval.fromDiff(start, end);
+
+      expect(interval.years).toBe(1);
+      expect(interval.months).toBe(0);
+      expect(interval.days).toBe(0);
+    });
+  });
+
+  // Reverse date order (negative intervals)
+  describe("fromDiff - Reverse Date Order", () => {
+    test("should handle end date before start date", () => {
+      const start = JsCarbon.create(2023, 6, 20);
+      const end = JsCarbon.create(2023, 1, 15);
+
+      const interval = JsCarbonInterval.fromDiff(start, end);
+
+      expect(interval.invert).toBe(true);
+      expect(interval.years).toBe(0);
+      expect(interval.months).toBe(-5);
+      expect(interval.days).toBe(-5);
+    });
+
+    test("should handle multi-year reverse interval", () => {
+      const start = JsCarbon.create(2024, 3, 15);
+      const end = JsCarbon.create(2022, 6, 20);
+
+      const interval = JsCarbonInterval.fromDiff(start, end);
+
+      expect(interval.invert).toBe(true);
+      expect(interval.years).toBe(-1);
+      expect(interval.months).toBe(-8);
+      expect(interval.days).toBe(-25);
+    });
+  });
+
+  // Absolute interval calculations
+  describe("fromDiff - Absolute Intervals", () => {
+    test("should calculate absolute interval", () => {
+      const start = JsCarbon.create(2023, 6, 20);
+      const end = JsCarbon.create(2023, 1, 15);
+
+      const interval = JsCarbonInterval.fromDiff(start, end, true);
+
+      expect(interval.invert).toBe(true);
+      expect(interval.years).toBe(0);
+      expect(interval.months).toBe(5);
+      expect(interval.days).toBe(5);
+    });
+
+    test("should handle absolute multi-year interval", () => {
+      const start = JsCarbon.create(2021, 3, 15);
+      const end = JsCarbon.create(2024, 6, 20);
+
+      const interval = JsCarbonInterval.fromDiff(start, end, true);
+
+      expect(interval.invert).toBe(false);
+      expect(interval.years).toBe(3);
+      expect(interval.months).toBe(3);
+      expect(interval.days).toBe(5);
+    });
+  });
+
+  // Edge cases
+  describe("fromDiff - Edge Cases", () => {
+    test("should handle same date", () => {
+      const start = JsCarbon.create(2023, 1, 15);
+      const end = JsCarbon.create(2023, 1, 15);
+
+      const interval = JsCarbonInterval.fromDiff(start, end);
+
+      expect(interval.years).toBe(0);
+      expect(interval.months).toBe(0);
+      expect(interval.days).toBe(0);
+    });
+
+    test("should handle leap year boundary", () => {
+      const start = JsCarbon.create(2024, 2, 28);
+      const end = JsCarbon.create(2024, 3, 1);
+
+      const interval = JsCarbonInterval.fromDiff(start, end);
+
+      expect(interval.years).toBe(0);
+      expect(interval.months).toBe(0);
+      expect(interval.days).toBe(2);
+    });
+
+    test("should handle complex month boundary", () => {
+      const start = JsCarbon.create(2023, 1, 31);
+      const end = JsCarbon.create(2023, 2, 28);
+
+      const interval = JsCarbonInterval.fromDiff(start, end);
+
+      expect(interval.years).toBe(0);
+      expect(interval.months).toBe(0);
+      expect(interval.days).toBe(28);
     });
   });
 });

@@ -344,17 +344,29 @@ export class JsCarbonInterval {
 
   get years(): number {
     let years = this._years;
-    return this._absolute ? Math.abs(years) : this._invert ? -years : years;
+    return this._absolute
+      ? Math.abs(years)
+      : this._invert && years != 0
+        ? -years
+        : years;
   }
 
   get months(): number {
     let months = this._months;
-    return this._absolute ? Math.abs(months) : this._invert ? -months : months;
+    return this._absolute
+      ? Math.abs(months)
+      : this._invert && months != 0
+        ? -months
+        : months;
   }
 
   get days(): number {
     let days = this._days;
-    return this._absolute ? Math.abs(days) : this._invert ? -days : days;
+    return this._absolute
+      ? Math.abs(days)
+      : this._invert && days != 0
+        ? -days
+        : days;
   }
 
   get weeks(): number {
@@ -363,22 +375,38 @@ export class JsCarbonInterval {
 
   get hours(): number {
     let val = this._hours;
-    return this._absolute ? Math.abs(val) : this._invert ? -val : val;
+    return this._absolute
+      ? Math.abs(val)
+      : this._invert && this._hours != 0
+        ? -val
+        : val;
   }
 
   get minutes(): number {
     let val = this._minutes;
-    return this._absolute ? Math.abs(val) : this._invert ? -val : val;
+    return this._absolute
+      ? Math.abs(val)
+      : this._invert && this._minutes != 0
+        ? -val
+        : val;
   }
 
   get seconds(): number {
     let val = this._seconds;
-    return this._absolute ? Math.abs(val) : this._invert ? -val : val;
+    return this._absolute
+      ? Math.abs(val)
+      : this._invert && this._seconds != 0
+        ? -val
+        : val;
   }
 
   get milliseconds(): number {
     let val = this._milliseconds;
-    return this._absolute ? Math.abs(val) : this._invert ? -val : val;
+    return this._absolute
+      ? Math.abs(val)
+      : this._invert && this._milliseconds != 0
+        ? -val
+        : val;
   }
 
   // 総計算メソッド
